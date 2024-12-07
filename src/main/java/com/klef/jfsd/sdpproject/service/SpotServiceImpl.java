@@ -4,20 +4,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.klef.jfsd.sdpproject.model.Spots;
-import com.klef.jfsd.sdpproject.repository.SpotRepository;
+import com.klef.jfsd.sdpproject.repository.SpotsRepository;
 
 @Service
 public class SpotServiceImpl implements SpotService {
+
     @Autowired
-    private SpotRepository spotRepository;
+    private SpotsRepository spotRepository;  // Correct field name
 
     @Override
     public Spots getSpotById(int id) {
-        return spotRepository.findById(id).orElse(null);
+        // Corrected to use spotRepository (lowercase)
+        return spotRepository.findById(id).orElse(null);  // Correct method call
     }
 
     @Override
     public void updateSpot(Spots spot) {
-        spotRepository.save(spot);
+        // Corrected to use spotRepository (lowercase)
+        spotRepository.save(spot);  // Correct method call
     }
 }

@@ -19,5 +19,16 @@ public interface TouristRepository extends JpaRepository<Tourist, Integer>
 	
 	
 	
+
+	    // Check if email already exists
+	    boolean existsByEmail(String email);
+
+	    // Check if contact number already exists
+	    boolean existsByContact(String contact);
+
+
+
+
+		public Tourist findByEmailAndPassword(String email, String pwd);
 	
 }

@@ -1,168 +1,144 @@
 package com.klef.jfsd.sdpproject.controller;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.klef.jfsd.sdpproject.model.Admin;
 import com.klef.jfsd.sdpproject.model.Spots;
 import com.klef.jfsd.sdpproject.model.Tourist;
 import com.klef.jfsd.sdpproject.service.TouristService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class TouristController 
-{
+public class TouristController {
+
     @Autowired
-    private TouristService touristservice;
-    
+    private TouristService touristService;
+
     @GetMapping("/")
     public ModelAndView home() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("home");
-        return mv;
+        return new ModelAndView("home");
     }
 
-    @GetMapping("aboutus")
+    @GetMapping("/aboutus")
     public ModelAndView aboutus() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("aboutus");
-        return mv;
+        return new ModelAndView("aboutus");
     }
 
-    @GetMapping("services")
+    @GetMapping("/services")
     public ModelAndView services() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("services");
-        return mv;
+        return new ModelAndView("services");
     }
 
-    @GetMapping("upcpackages")
+    @GetMapping("/upcpackages")
     public ModelAndView upcpackages() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("upcpackages");
-        return mv;
+        return new ModelAndView("upcpackages");
     }
 
     @GetMapping("/touristreg")
     public ModelAndView touristreg() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("touristreg");
-        return mv;
+        return new ModelAndView("touristreg");
     }
 
     @GetMapping("/touristlogin")
     public ModelAndView touristlogin() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("touristlogin");
-        return mv;
+        return new ModelAndView("touristlogin");
     }
 
-    @PostMapping("inserttourist")
-    public ModelAndView inserttourist(HttpServletRequest request) {
-        String name = request.getParameter("ename");
-        String gender = request.getParameter("egender");
-        String dob = request.getParameter("edob");
-        String email = request.getParameter("eemail");
-        String password = request.getParameter("epwd");
-        String contact = request.getParameter("econtact");
+    @PostMapping("/inserttourist")
+    public String insertTourist(@RequestParam("ename") String name, 
+                                 @RequestParam("egender") String gender,
+                                 @RequestParam("edob") String dob, 
+                                 @RequestParam("eemail") String email,
+                                 @RequestParam("epwd") String password, 
+                                 @RequestParam("econtact") String contact,
+                                 Model model) {
+        try {
+            if (touristService.emailExists(email)) {
+                model.addAttribute("message", "Email already in use.");
+                return "touristreg";
+            }
 
-        Tourist tour = new Tourist();
-        tour.setName(name);
-        tour.setGender(gender);
-        tour.setDateofbirth(dob);
-        tour.setEmail(email);
-        tour.setPassword(password);
-        tour.setContact(contact);
+            if (touristService.contactExists(contact)) {
+                model.addAttribute("message", "Contact number already in use.");
+                return "touristreg";
+            }
 
-        String msg = touristservice.TouristRegistration(tour);
-
-        ModelAndView mv = new ModelAndView("touristregsucess");
-        mv.addObject("message", msg);
-
-        return mv;
+            Tourist tourist = new Tourist(name, gender, dob, email, password, contact);
+            touristService.saveTourist(tourist);
+            model.addAttribute("message", "Registration successful! Please log in.");
+            return "redirect:/touristlogin";
+        } catch (Exception e) {
+            model.addAttribute("message", "An error occurred during registration.");
+            return "touristreg";
+        }
     }
 
-    @PostMapping("checktourlogin")
+    @PostMapping("/checktourlogin")
     public ModelAndView checktourlogin(HttpServletRequest request) {
         ModelAndView mv = new ModelAndView();
 
-        String eemail = request.getParameter("eemail");
-        String epwd = request.getParameter("epwd");
+        String email = request.getParameter("eemail");
+        String password = request.getParameter("epwd");
 
-        Tourist tour = touristservice.checktourlogin(eemail, epwd);
+        Tourist tour = touristService.checkTourLogin(email, password);
 
         if (tour != null) {
-            // Create session and set timeout to 15 seconds
             HttpSession session = request.getSession();
-            session.setAttribute("tourist", tour);  // "tourist" is session variable
-
-            // Set session timeout to 15 seconds
-            session.setMaxInactiveInterval(15);  // Timeout after 15 seconds
-
+            session.setAttribute("tourist", tour);
+            session.setMaxInactiveInterval(900);
             mv.setViewName("touristhome");
         } else {
             mv.setViewName("touristlogin");
-            mv.addObject("message", "Login Failed");
+            mv.addObject("message", "Login failed. Please check your credentials.");
         }
 
         return mv;
     }
 
-    @GetMapping("touristhome")
+    @GetMapping("/touristhome")
     public ModelAndView touristhome() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("touristhome");
-        return mv;
+        return new ModelAndView("touristhome");
     }
 
-    @GetMapping("touristprofile")
+    @GetMapping("/touristprofile")
     public ModelAndView touristprofile() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("touristprofile");
-        return mv;
+        return new ModelAndView("touristprofile");
     }
 
-    @GetMapping("touristcontactus")
+    @GetMapping("/touristcontactus")
     public ModelAndView touristcontactus() {
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("touristcontactus");
-        return mv;
+        return new ModelAndView("touristcontactus");
     }
 
-    @GetMapping("touristlogout")
-    public ModelAndView touristlogout(HttpServletRequest request) {
+    @GetMapping("/touristlogout")
+    public String touristlogout(HttpServletRequest request) {
         HttpSession session = request.getSession();
-        session.removeAttribute("tourist");
         session.invalidate();
-
-        ModelAndView mv = new ModelAndView();
-        mv.setViewName("touristlogin");
-        return mv;
+        return "redirect:/touristlogin";
     }
 
-    @GetMapping("viewspots")
+    @GetMapping("/viewspots")
     public ModelAndView viewspots() {
         ModelAndView mv = new ModelAndView();
-        List<Spots> spots = touristservice.viewspots(); // Replace with actual service method
-        mv.setViewName("viewspots");
-        mv.addObject("spots", spots);
+        try {
+            List<Spots> spots = touristService.viewSpots();
+            mv.setViewName("viewspots");
+            mv.addObject("spots", spots);
+        } catch (Exception e) {
+            mv.setViewName("error");
+            mv.addObject("message", "Error fetching spots.");
+        }
         return mv;
     }
 
-    // Method to check if session is valid (useful for larger applications)
-    public boolean isSessionValid(HttpServletRequest request) {
+    private boolean isSessionValid(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        if (session != null) {
-            Tourist tourist = (Tourist) session.getAttribute("tourist");
-            return tourist != null;  // Session is valid if tourist object exists
-        }
-        return false;  // Session has expired or does not exist
+        return session != null && session.getAttribute("tourist") != null;
     }
 }

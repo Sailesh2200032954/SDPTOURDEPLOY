@@ -9,52 +9,52 @@ import com.klef.jfsd.sdpproject.model.Admin;
 import com.klef.jfsd.sdpproject.model.Spots;
 import com.klef.jfsd.sdpproject.model.Tourist;
 import com.klef.jfsd.sdpproject.repository.AdminRepository;
-import com.klef.jfsd.sdpproject.repository.SpotRepository;
+import com.klef.jfsd.sdpproject.repository.SpotsRepository;
 import com.klef.jfsd.sdpproject.repository.TouristRepository;
 
-
 @Service
-public class AdminServiceImpl implements AdminService
-{
-	@Autowired
-	private AdminRepository adminRepository;
-	
-	@Autowired
-	private SpotRepository spotRepository;
-	
-	@Autowired
-	private TouristRepository touristRepository;
-	
-	@Override
-	public Admin checkadminlogin(String uname, String pwd) {
-		return adminRepository.checkadminlogin(uname, pwd);
-	}
+public class AdminServiceImpl implements AdminService {
 
-	
+    @Autowired
+    private AdminRepository adminRepository;
 
-	@Override
-	public String deletetour(int tid) {
-		// TODO Auto-generated method stub
-		touristRepository.deleteById(tid);
-		return "Employee deleted Successfully";
-	}
+    @Autowired
+    private SpotsRepository spotsRepository;
 
-	@Override
-	public String AddSpot(Spots spots) {
-		spotRepository.save(spots);
-		return "Spot Added Successfully";
-	}
+    @Autowired
+    private TouristRepository touristRepository;
 
+    @Override
+    public Admin checkadminlogin(String uname, String pwd) {
+        // Check if the admin exists with the provided username and password
+        return adminRepository.findByusernameAndpassword(uname, pwd);
+    }
 
+    @Override
+    public String deletetour(int eid) {
+        try {
+            // Assuming that TouristRepository has a deleteById method
+            touristRepository.deleteById(eid);
+            return "Tourist deleted successfully.";
+        } catch (Exception e) {
+            return "Error deleting tourist: " + e.getMessage();
+        }
+    }
 
-	@Override
-	public List<Tourist> viewalltourists() {
-		// TODO Auto-generated method stub
-		return (List<Tourist>) touristRepository.findAll();
-	}
+    @Override
+    public String AddSpot(Spots spots) {
+        try {
+            // Save the new tourist spot into the database
+            spotsRepository.save(spots);
+            return "Spot added successfully.";
+        } catch (Exception e) {
+            return "Error adding spot: " + e.getMessage();
+        }
+    }
 
-
-
-
-	}
-
+    @Override
+    public List<Tourist> viewalltourists() {
+        // Retrieve all tourists from the database
+        return touristRepository.findAll();
+    }
+}

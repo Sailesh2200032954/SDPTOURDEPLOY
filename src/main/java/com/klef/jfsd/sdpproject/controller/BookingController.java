@@ -1,19 +1,30 @@
 package com.klef.jfsd.sdpproject.controller;
 
-import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.klef.jfsd.sdpproject.model.Booking;
+import com.klef.jfsd.sdpproject.service.BookingService;
 
-@Controller
+@RestController
+@RequestMapping("/bookings")
 public class BookingController {
 
-    @GetMapping("/bookingconfirmation")
-    public String showBookingConfirmation(@RequestParam Map<String, String> params, Model model) {
-        // Add necessary attributes to the model
-        model.addAttribute("params", params);
-        return "bookingconfirmation"; // This resolves to BookingConfirmation.jsp
+    @Autowired
+    private BookingService bookingService;
+
+    @PostMapping("/create")
+    public Booking createBooking(@RequestParam String name,
+                                 @RequestParam String email,
+                                 @RequestParam String spotName,
+                                 @RequestParam String spotLocation,
+                                 @RequestParam String bookingDate,
+                                 @RequestParam Long amount) {
+        return bookingService.createBooking(name, email, spotName, spotLocation, bookingDate, amount);
+    }
+
+    @GetMapping("/{id}")
+    public Booking getBooking(@PathVariable Long id) {
+        return bookingService.getBookingById(id);
     }
 }
