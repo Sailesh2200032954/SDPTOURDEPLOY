@@ -245,6 +245,26 @@
             }
         }
     </style>
+    <script>
+        // Set the session timeout to 15 minutes (900,000 milliseconds)
+        const sessionTimeout = 60 * 1000; // 15 minutes in milliseconds
+
+        // Function to handle session expiry
+        function handleSessionExpiry() {
+            alert("Your session has expired due to inactivity.");
+            window.location.href = '/touristlogin'; // Redirect to the login page after session expires
+        }
+
+        // Set a timer to call the function after 15 minutes
+        setTimeout(handleSessionExpiry, sessionTimeout);
+        
+        // Reset session timer on user interaction (mouse movement, key press, etc.)
+        let timeoutTimer;
+        document.onmousemove = document.onkeypress = function() {
+            clearTimeout(timeoutTimer);
+            timeoutTimer = setTimeout(handleSessionExpiry, sessionTimeout);
+        };
+    </script>
 </head>
 <body>
     <%@ include file="touristnavbar.jsp" %>
@@ -306,7 +326,6 @@
                 </ul>
             </div>
 
-           
         </div>
     </div>
 </body>

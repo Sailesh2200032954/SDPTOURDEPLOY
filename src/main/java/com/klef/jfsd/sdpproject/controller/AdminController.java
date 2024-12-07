@@ -175,6 +175,12 @@ public class AdminController {
 		adminService.deletetour(tid);
 		return "redirect:/deletetour"; //redirection to specific path
 	}
+	 public ModelAndView sessionTimeout() {
+	        ModelAndView mv = new ModelAndView();
+	        mv.setViewName("adminlogin");  // Redirect to login page
+	        mv.addObject("message", "Your session has expired. Please log in again.");
+	        return mv;
+	    }
 	
 }
 
